@@ -1,0 +1,43 @@
+name: Build and Release
+
+on:
+  push:
+    branches: "main"
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Build
+        run: gcc main.c -o main
+
+      - name: Upload Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: main
+
+  release:
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Build
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "main"
+          makeLatest: true
+          tag: ${{ github.run_number }}
+
